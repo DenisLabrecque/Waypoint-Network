@@ -68,7 +68,7 @@ namespace WaypointNetwork
       /// <returns>A one-line string.</returns>
       public override string ToString()
       {
-         return "\n" + _previous.Callsign + " (" + _distance + ") " + _next.Callsign;
+         return _previous.Callsign + " (" + _distance + ") " + _next.Callsign;
       }
    }
 }

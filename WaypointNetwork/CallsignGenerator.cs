@@ -60,91 +60,105 @@ namespace WaypointNetwork
       /// <summary>
       /// Create a new callsign that is unique to this class instance.
       /// </summary>
-      public string Unique {
-         get {
-            string callsign = Random;
-            while(_uniqueNames.Contains(callsign))
-            {
-               Console.Write(callsign + " is not unique. Generating... ");
-               callsign = Random;
-               Console.WriteLine(callsign);
-            }
-            _uniqueNames.Add(callsign);
-            return callsign;
+      /// <param name="firstLetter">Optional letter the callsign should start with. Value should be alphabetic and uppercase.</param>
+      /// <returns>A unique callsign optionally starting with a certain character.</returns>
+      public string Unique(char? firstLetter = null) {
+         string callsign = Random(firstLetter);
+         while(_uniqueNames.Contains(callsign))
+         {
+            Console.Write(callsign + " is not unique. Generating... ");
+            callsign = Random();
+            Console.WriteLine(callsign);
          }
+         _uniqueNames.Add(callsign);
+         return callsign;
       }
 
       /// <summary>
       /// Create a new callsign that is not guaranteed to be unique.
       /// </summary>
-      public string Random {
-         get {
-            int characters = _random.Next(MinLetters, MaxLetters + 1);
-            StringBuilder builder = new StringBuilder();
-            bool isVowel = false;
-            char lastConsonant;
+      /// <param name="firstLetter">Optional letter the callsign should start with. Value should be alphabetic and uppercase.</param>
+      /// <returns>A non-unique callsign optionally starting with a certain character.</returns>
+      public string Random(char? firstLetter = null) {
+         int characters = _random.Next(MinLetters, MaxLetters + 1);
+         StringBuilder builder = new StringBuilder();
+         bool nextIsVowel = false;
+         char previousConsonant;
 
-            for (int i = 1; i <= characters; i++)
+         if(firstLetter != null)
+         {
+            builder.Append(firstLetter);
+            characters--;
+            if(Vowels.Contains((char)firstLetter))
             {
-               if (isVowel == true)
+               nextIsVowel = false;
+            }
+            else
+            {
+               nextIsVowel = true;
+            }
+         }
+
+         for (int i = 1; i <= characters; i++)
+         {
+            if (nextIsVowel == true)
+            {
+               builder.Append(RandomVowel);
+               nextIsVowel = false;
+            }
+            else
+            {
+               previousConsonant = RandomConsonant;
+
+               // Should not start with X
+               if (i == 1 && previousConsonant == 'X')
                {
-                  builder.Append(RandomVowel);
-                  isVowel = false;
+                  while (previousConsonant == 'X')
+                  {
+                     previousConsonant = RandomConsonant;
+                  }
+                  builder.Append(previousConsonant);
+                  nextIsVowel = true;
+               }
+               // Use QU or replace Q
+               else if (previousConsonant == 'Q')
+               {
+                  // No Q at the end of a word
+                  if (i == characters)
+                  {
+                     while (previousConsonant == 'Q')
+                     {
+                        previousConsonant = RandomConsonant;
+                     }
+                     builder.Append(previousConsonant);
+                     nextIsVowel = true;
+                  }
+                  // Otherwise always use QU
+                  else
+                  {
+                     builder.Append("QU");
+                     i++;
+                     nextIsVowel = false;
+                  }
+               }
+               // Never end with J
+               else if (i == characters && previousConsonant == 'J')
+               {
+                  while (previousConsonant == 'J')
+                  {
+                     previousConsonant = RandomConsonant;
+                  }
+                  builder.Append(previousConsonant);
                }
                else
                {
-                  lastConsonant = RandomConsonant;
-
-                  // Should not start with X
-                  if (i == 1 && lastConsonant == 'X')
-                  {
-                     while (lastConsonant == 'X')
-                     {
-                        lastConsonant = RandomConsonant;
-                     }
-                     builder.Append(lastConsonant);
-                     isVowel = true;
-                  }
-                  // Use QU or replace Q
-                  else if (lastConsonant == 'Q')
-                  {
-                     // No Q at the end of a word
-                     if (i == characters)
-                     {
-                        while (lastConsonant == 'Q')
-                        {
-                           lastConsonant = RandomConsonant;
-                        }
-                        builder.Append(lastConsonant);
-                        isVowel = true;
-                     }
-                     // Otherwise always use QU
-                     else
-                     {
-                        builder.Append("QU");
-                        i++;
-                        isVowel = false;
-                     }
-                  }
-                  // Never end with J
-                  else if (i == characters && lastConsonant == 'J')
-                  {
-                     while (lastConsonant == 'J')
-                     {
-                        lastConsonant = RandomConsonant;
-                     }
-                     builder.Append(lastConsonant);
-                  }
-                  else
-                  {
-                     builder.Append(lastConsonant);
-                     isVowel = true;
-                  }
+                  builder.Append(previousConsonant);
+                  nextIsVowel = true;
                }
             }
-
-            return builder.ToString();
          }
+
+         return builder.ToString();
       }
 
       /// <summary>
@@ -166,7 +180,7 @@ namespace WaypointNetwork
          List<string> names = new List<string>();
          for(int i = 1; i <= number; i++)
          {
-            names.Add(Random);
+            names.Add(Random());
          }
          return names;
       }
@@ -181,7 +195,7 @@ namespace WaypointNetwork
          List<string> names = new List<string>();
          for (int i = 1; i <= number; i++)
          {
-            names.Add(Unique);
+            names.Add(Unique());
          }
          return names;
       }

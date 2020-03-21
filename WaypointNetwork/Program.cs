@@ -15,12 +15,12 @@ namespace WaypointNetwork
             Console.WriteLine(name);
          }
 
-         Waypoint a = new Waypoint("A");
-         Waypoint b = new Waypoint("B");
-         Waypoint c = new Waypoint("C");
-         Waypoint d = new Waypoint("D");
-         Waypoint e = new Waypoint("E");
-         Waypoint f = new Waypoint("F");
+         Waypoint a = new Waypoint('A');
+         Waypoint b = new Waypoint('B');
+         Waypoint c = new Waypoint('C');
+         Waypoint d = new Waypoint('D');
+         Waypoint e = new Waypoint('E');
+         Waypoint f = new Waypoint('F');
 
 
          List<(Waypoint, Waypoint, float)> list = new List<(Waypoint, Waypoint, float)>()
@@ -36,22 +36,13 @@ namespace WaypointNetwork
          Network network = new Network(list);
          Console.WriteLine(network.ToString());
 
-         //a.TwoWayConnect(2.0f, b);
-         //a.TwoWayConnect(2.0f, c);
-         //c.TwoWayConnect(2.0f, b);
-         //c.TwoWayConnect(3.0f, d);
-         //d.TwoWayConnect(4.0f, e);
-         //d.TwoWayConnect(4.0f, f);
-         //e.TwoWayConnect(5.0f, f);
-
-         //Console.WriteLine(a.ToString());
-         //Console.WriteLine(b.ToString());
-         //Console.WriteLine(c.ToString());
-         //Console.WriteLine(d.ToString());
-         //Console.WriteLine(e.ToString());
-         //Console.WriteLine(f.ToString());
-
-         network.ShortestPath(a, f);
+         Console.WriteLine();
+         Console.WriteLine("Find the shortest connections from " + a + " to " + f + ":");
+         List<Connection> connections = network.ShortestConnections(a, f);
+         foreach (Connection connection in connections)
+         {
+            Console.WriteLine("  Connection: " + connection.ToString());
+         }
       }
    }
 }

@@ -23,10 +23,33 @@ namespace WaypointNetwork
       /// <summary>
       /// Find the shortest distance in waypoints from one waypoint to the next.
       /// </summary>
-      /// <param name="to">The waypoint to start at.</param>
-      /// <param name="from">The waypoint to end at.</param>
+      /// <param name="to">Waypoint to start at.</param>
+      /// <param name="from">Waypoint reach.</param>
       /// <returns>A list of waypoints that form the shortest path.</returns>
-      public List<Waypoint> ShortestPath(Waypoint from, Waypoint to) {
+      public List<Waypoint> ShortestWaypoints(Waypoint from, Waypoint to) {
+         return ListWaypoints(from, to, CrawlNetwork(from, to));
+      }
+
+      /// <summary>
+      /// Find the shortest distance in connections from one waypoint to another.
+      /// </summary>
+      /// <param name="from">Waypoint to start at.</param>
+      /// <param name="to">Waypoint to reach.</param>
+      /// <returns>A list of connections that form the shortest path.</returns>
+      public List<Connection> ShortestConnections(Waypoint from, Waypoint to)
+      {
+         return ListConnections(from, to, CrawlNetwork(from, to));
+      }
+
+      /// <summary>
+      /// At each network node, finb the direction one should come from that would point
+      /// towards the objective.
+      /// </summary>
+      /// <param name="from">Waypoint to start at.</param>
+      /// <param name="to">Waypoint to reach.</param>
+      /// <returns>A dictionary of waypoints that indicates a direction for each waypoint.</returns>
+      private Dictionary<Waypoint, Waypoint> CrawlNetwork(Waypoint from, Waypoint to)
+      {
          Queue<Waypoint> frontier = new Queue<Waypoint>();
          frontier.Enqueue(to);
          Dictionary<Waypoint, Waypoint> cameFrom = new Dictionary<Waypoint, Waypoint>();
@@ -34,54 +57,50 @@ namespace WaypointNetwork
          Waypoint current;
 
          // Go through the nodes
-         while(frontier.Count != 0)
+         while (frontier.Count != 0)
          {
             current = frontier.Dequeue();
-            foreach(KeyValuePair<Waypoint, float> next in current.Neighbours)
+            foreach (KeyValuePair<Waypoint, float> next in current.Neighbours)
             {
-               if(cameFrom.ContainsKey(next.Key) == false)
+               if (cameFrom.ContainsKey(next.Key) == false)
                {
                   frontier.Enqueue(next.Key);
-                  Console.WriteLine("Enqueued " + next.Key);
                   cameFrom[next.Key] = current;
                }
             }
          }
-
-         return ListWaypoints(from, to, cameFrom);
+         return cameFrom;
       }
 
-      private List<Waypoint> ListWaypoints(Waypoint from, Waypoint to, Dictionary<Waypoint, Waypoint> cameFrom)
+      private List<Waypoint> ListWaypoints(Waypoint from, Waypoint to, Dictionary<Waypoint, Waypoint> directions)
       {
          Waypoint current = from;
          List<Waypoint> path = new List<Waypoint>();
          while(current != to)
          {
             path.Add(current);
-            current = cameFrom[current];
+            current = directions[current];
          }
          path.Add(to);
-
-         foreach (Waypoint waypoint in path)
-         {
-            Console.WriteLine("Path: " + waypoint);
-         }
 
          return path;
       }
 
-      //private List<Connection> ListConnections(Waypoint from, Waypoint to, Dictionary<Waypoint, Waypoint> cameFrom)
-      //{
-      //   Waypoint current = from;
-      //   List<Connection> path = new List<Connection>();
-      //   while(current != to)
-      //   {
-      //      Waypoint start = cameFrom[current];
-      //      Waypoint end = current;
-      //      float distance = start.Neighbours[]
-      //      path.Add()
-      //   }
-      //}
+      private List<Connection> ListConnections(Waypoint from, Waypoint to, Dictionary<Waypoint, Waypoint> directions)
+      {
+         Waypoint current = from;
+         Waypoint end;
+         List<Connection> path = new List<Connection>();
+         while (current != to)
+         {
+            end = directions[current];
+            Connection connection = new Connection(current, end, end.Neighbours[current]);
+            path.Add(connection);
+            current = end;
+         }
+
+         return path;
+      }
 
       /// <summary>
       /// Create a mutual connection between waypoints.

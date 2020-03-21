@@ -52,8 +52,8 @@ namespace WaypointNetwork
       /// </summary>
       public Waypoint()
       {
-         _callsign = _generator.Unique;
          ConstructorHelper();
+         _callsign = _generator.Unique();
       }
 
       /// <summary>
@@ -62,8 +62,14 @@ namespace WaypointNetwork
       /// <param name="callsign"></param>
       public Waypoint(string callsign)
       {
-         _callsign = callsign;
          ConstructorHelper();
+         _callsign = callsign;
+      }
+
+      public Waypoint(char callsignFirstLetter)
+      {
+         ConstructorHelper();
+         _callsign = _generator.Random(callsignFirstLetter);
       }
 
       /// <summary>
