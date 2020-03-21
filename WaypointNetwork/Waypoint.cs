@@ -73,7 +73,7 @@ namespace WaypointNetwork
          string output = Callsign + " connects to:\n";
          foreach(Connection connection in _connections)
          {
-            output += "  " + connection.Waypoint1.Callsign + " - " + connection.Distance + " - " + connection.Waypoint2.Callsign + "\n";
+            output += "  " + connection.Previous.Callsign + " - " + connection.Distance + " - " + connection.Next.Callsign + "\n";
          }
          return output;
       }

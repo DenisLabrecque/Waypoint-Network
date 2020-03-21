@@ -6,19 +6,19 @@ namespace WaypointNetwork
 {
    public class Connection
    {
-      private Waypoint _waypoint1;
-      private Waypoint _waypoint2;
+      private Waypoint _previous;
+      private Waypoint _next;
       private float _distance;
 
-      public Waypoint Waypoint1 {
+      public Waypoint Previous {
          get {
-            return _waypoint1;
+            return _previous;
          }
       }
 
-      public Waypoint Waypoint2 {
+      public Waypoint Next {
          get {
-            return _waypoint2;
+            return _next;
          }
       }
 
@@ -28,9 +28,9 @@ namespace WaypointNetwork
          }
       }
 
-      public Connection(Waypoint waypoint1, Waypoint waypoint2, float distance = 1.0f)
+      public Connection(Waypoint previous, Waypoint next, float distance = 1.0f)
       {
-         if(waypoint1 == null || waypoint2 == null)
+         if(previous == null || next == null)
          {
             throw new Exception("Waypoints cannot be connected if they are null.");
          }
@@ -39,14 +39,14 @@ namespace WaypointNetwork
             throw new Exception("Waypoints must be distant from each other.");
          }
 
-         _waypoint1 = waypoint1;
-         _waypoint2 = waypoint2;
+         _previous = previous;
+         _next = next;
          _distance = distance;
       }
 
       public override string ToString()
       {
-         return _waypoint1.Callsign + " -> " + _waypoint2.Callsign;
+         return _previous.Callsign + " -> " + _next.Callsign;
       }
    }
 }

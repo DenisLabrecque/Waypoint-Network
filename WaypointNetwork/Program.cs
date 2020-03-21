@@ -50,6 +50,8 @@ namespace WaypointNetwork
          //Console.WriteLine(d.ToString());
          //Console.WriteLine(e.ToString());
          //Console.WriteLine(f.ToString());
+
+         network.ShortestPath(a, f);
       }
    }
 }
