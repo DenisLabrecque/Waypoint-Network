@@ -13,7 +13,7 @@ namespace WaypointNetwork
       static CallsignGenerator _generator = null;
 
       string _callsign;
-      List<Connection> _neighbours;
+      Dictionary<Waypoint, float> _neighbours;
 
       /// <summary>
       /// This waypoint's name.
@@ -27,7 +27,7 @@ namespace WaypointNetwork
       /// <summary>
       /// All the waypoints connected to this one, with their distances away.
       /// </summary>
-      public List<Connection> Neighbours {
+      public Dictionary<Waypoint, float> Neighbours {
          get {
             return _neighbours;
          }
@@ -39,9 +39,9 @@ namespace WaypointNetwork
       public string ConnectionsDebug {
          get {
             StringBuilder builder = new StringBuilder();
-            foreach (Connection connection in _neighbours)
+            foreach (var neighbour in _neighbours)
             {
-               builder.Append("\n  " + connection.Previous.Callsign + " - " + connection.Distance + " - " + connection.Next.Callsign);
+               builder.Append("\n  " + _callsign + " - " + neighbour.Value + " - " + neighbour.Key);
             }
             return builder.ToString();
          }
@@ -75,7 +75,7 @@ namespace WaypointNetwork
          {
             _generator = new CallsignGenerator();
          }
-         _neighbours = new List<Connection>();
+         _neighbours = new Dictionary<Waypoint, float>();
       }
 
       /// <summary>
@@ -84,13 +84,10 @@ namespace WaypointNetwork
       /// </summary>
       /// <param name="waypoint">The waypoint to connect to.</param>
       /// <param name="distance">Distance between both waypoints.</param>
-      /// <returns>The resulting connection.</returns>
-      public Connection TwoWayConnect(Waypoint waypoint, float distance)
+      public void TwoWayConnect(Waypoint waypoint, float distance)
       {
-         Connection connection = new Connection(this, waypoint, distance);
-         _neighbours.Add(connection);
+         _neighbours.Add(waypoint, distance);
          waypoint.OneWayConnect(this, distance);
-         return connection;
       }
 
       /// <summary>
@@ -100,11 +97,9 @@ namespace WaypointNetwork
       /// <param name="waypoint">To waypoint to connect to.</param>
       /// <param name="distance">Distance between both waypoints.</param>
       /// <returns>The resulting connection.</returns>
-      internal Connection OneWayConnect(Waypoint waypoint, float distance)
+      internal void OneWayConnect(Waypoint waypoint, float distance)
       {
-         Connection connection = new Connection(this, waypoint, distance);
-         _neighbours.Add(connection);
-         return connection;
+         _neighbours.Add(waypoint, distance);
       }
 
       /// <summary>
