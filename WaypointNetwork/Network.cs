@@ -26,7 +26,7 @@ namespace WaypointNetwork
          while(frontier.Count != 0)
          {
             current = frontier.Dequeue();
-            foreach(Connection next in current.Connections)
+            foreach(Connection next in current.Neighbours)
             {
                if(cameFrom.ContainsKey(next.Next) == false)
                {
@@ -60,15 +60,19 @@ namespace WaypointNetwork
          _waypoints.Add(waypoint2);
       }
 
+      /// <summary>
+      /// Prints all the waypoints in the network and their connections.
+      /// </summary>
+      /// <returns>A string that lists all the network nodes.</returns>
       public override string ToString()
       {
          StringBuilder builder = new StringBuilder();
          foreach(Waypoint waypoint in _waypoints)
          {
             builder.Append(waypoint.Callsign + ":\n");
-            foreach(Connection connection in waypoint.Connections)
+            foreach(Connection connection in waypoint.Neighbours)
             {
-               builder.Append("  " + connection.Next.Callsign + " " + connection.Distance + "\n");
+               builder.Append("\n  (" + connection.Distance + ") " + connection.Next.Callsign);
             }
          }
          return builder.ToString();

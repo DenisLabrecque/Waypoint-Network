@@ -7,13 +7,13 @@ namespace WaypointNetwork
    {
       static void Main(string[] args)
       {
-         //CallsignGenerator generator = new CallsignGenerator();
-         //List<string> names = generator.UniqueCallsigns(100);
-         //names.Sort();
-         //foreach(string name in names)
-         //{
-         //   Console.WriteLine(name);
-         //}
+         CallsignGenerator generator = new CallsignGenerator();
+         List<string> names = generator.UniqueCallsigns(100);
+         names.Sort();
+         foreach (string name in names)
+         {
+            Console.WriteLine(name);
+         }
 
          Waypoint a = new Waypoint("A");
          Waypoint b = new Waypoint("B");
