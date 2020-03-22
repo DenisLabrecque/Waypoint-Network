@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using PriorityQueue;
 
 namespace WaypointNetwork
 {
+   /// <summary>
+   /// An all-knowing network of waypoints.
+   /// </summary>
    class Network
    {
       HashSet<Waypoint> _waypoints = new HashSet<Waypoint>();
@@ -42,29 +46,35 @@ namespace WaypointNetwork
       }
 
       /// <summary>
-      /// At each network node, finb the direction one should come from that would point
+      /// At each network node, find the direction one should come from that would point
       /// towards the objective.
       /// </summary>
-      /// <param name="from">Waypoint to start at.</param>
-      /// <param name="to">Waypoint to reach.</param>
+      /// <param name="end">Waypoint to start at.</param>
+      /// <param name="start">Waypoint to reach.</param>
       /// <returns>A dictionary of waypoints that indicates a direction for each waypoint.</returns>
-      private Dictionary<Waypoint, Waypoint> CrawlNetwork(Waypoint from, Waypoint to)
+      private Dictionary<Waypoint, Waypoint> CrawlNetwork(Waypoint end, Waypoint start)
       {
-         Queue<Waypoint> frontier = new Queue<Waypoint>();
-         frontier.Enqueue(to);
+         SimplePriorityQueue<Waypoint> frontier = new SimplePriorityQueue<Waypoint>();
+         frontier.Enqueue(start, 0);
          Dictionary<Waypoint, Waypoint> cameFrom = new Dictionary<Waypoint, Waypoint>();
-         cameFrom.Add(to, null);
+         cameFrom.Add(start, null);
          Waypoint current;
+         Dictionary<Waypoint, float> costSoFar = new Dictionary<Waypoint, float>();
+         costSoFar.Add(start, 0);
 
          // Go through the nodes
          while (frontier.Count != 0)
          {
             current = frontier.Dequeue();
+
             foreach (KeyValuePair<Waypoint, float> next in current.Neighbours)
             {
-               if (cameFrom.ContainsKey(next.Key) == false)
+               float newCost = costSoFar[current] + next.Value;
+               if(costSoFar.ContainsKey(next.Key) == false || newCost < costSoFar[next.Key])
                {
-                  frontier.Enqueue(next.Key);
+                  costSoFar[next.Key] = newCost;
+                  float priority = newCost;
+                  frontier.Enqueue(next.Key, priority);
                   cameFrom[next.Key] = current;
                }
             }
