@@ -31,7 +31,7 @@ namespace WaypointNetwork
       /// <param name="from">Waypoint reach.</param>
       /// <returns>A list of waypoints that form the shortest path.</returns>
       public List<Waypoint> ShortestWaypoints(Waypoint from, Waypoint to) {
-         return ListWaypoints(from, to, CrawlNetwork(from, to));
+         return ListWaypoints(from, to, CrawlNetwork(to));
       }
 
       /// <summary>
@@ -42,17 +42,16 @@ namespace WaypointNetwork
       /// <returns>A list of connections that form the shortest path.</returns>
       public List<Connection> ShortestConnections(Waypoint from, Waypoint to)
       {
-         return ListConnections(from, to, CrawlNetwork(from, to));
+         return ListConnections(from, to, CrawlNetwork(to));
       }
 
       /// <summary>
       /// At each network node, find the direction one should come from that would point
       /// towards the objective.
       /// </summary>
-      /// <param name="end">Waypoint to start at.</param>
-      /// <param name="start">Waypoint to reach.</param>
+      /// <param name="start">Waypoint to start at.</param>
       /// <returns>A dictionary of waypoints that indicates a direction for each waypoint.</returns>
-      private Dictionary<Waypoint, Waypoint> CrawlNetwork(Waypoint end, Waypoint start)
+      private Dictionary<Waypoint, Waypoint> CrawlNetwork(Waypoint start)
       {
          SimplePriorityQueue<Waypoint> frontier = new SimplePriorityQueue<Waypoint>();
          frontier.Enqueue(start, 0);
