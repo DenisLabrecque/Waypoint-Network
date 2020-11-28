@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace WaypointNetwork
+namespace DGL.Utility
 {
    /// <summary>
    /// Creates random callsigns similar to those used for aviation navigation charts. Every callsign will be created
@@ -20,66 +20,118 @@ namespace WaypointNetwork
       private static readonly List<char> FrequentConsonants = new List<char>() { 'B', 'C', 'L', 'M', 'N', 'P', 'R', 'S', 'T' };
       private static readonly List<char> NormalConsonants = new List<char>() { 'D', 'F', 'G', 'H', 'J' };
       private static readonly List<char> RareConsonants = new List<char>() { 'K', 'Q', 'V', 'X', 'Y', 'Z' };
-      private const int MinLetters = 3;
-      private const int MaxLetters = 6;
-      private static Random _random;
-      private static int _frequency;
-      private static HashSet<string> _uniqueNames;
+      private int MinLetters = 3;
+      private int MaxLetters = 6;
+      private Random _random = new Random();
+      private int _frequency;
+
+      #region Properties
+
+      /// <summary>
+      /// Get the list of all random callsigns generated so far, in the order generated.
+      /// </summary>
+      public List<string> RandomNames { get; private set; } = new List<string>();
+
+      /// <summary>
+      /// Get the list of all random callsigns generated so far, in sorted order.
+      /// </summary>
+      public List<string> NamesSorted {
+         get {
+            List<string> alphabetic = new List<string>(RandomNames);
+            alphabetic.Sort();
+            return alphabetic;
+         }
+      }
+     
+      /// <summary>
+      /// Get the list of unique names generated so far, in the order generated.
+      /// </summary>
+      public HashSet<string> UniqueNames { get; private set; } = new HashSet<string>();
 
       /// <summary>
       /// Returns the next consonant, with a 3/6 chance of being a frequent consonant,
       /// 2/6 chance of being a normal consonant, and a 1/6 chance of being a rare consonant.
       /// </summary>
-      private static char RandomConsonant {
+      private char RandomConsonant {
          get {
             _frequency = _random.Next(1, 7);
             if(1 <= _frequency && _frequency <= 3) // 1, 2, 3
-            {
                return FrequentConsonants[_random.Next(0, FrequentConsonants.Count)];
-            }
             else if(4 <= _frequency && _frequency <= 5) // 4, 5
-            {
                return NormalConsonants[_random.Next(0, NormalConsonants.Count)];
-            }
             else // 6
-            {
                return RareConsonants[_random.Next(0, RareConsonants.Count)];
-            }
          }
       }
 
       /// <summary>
       /// Returns a random vowel.
       /// </summary>
-      private static char RandomVowel {
-         get {
-            return Vowels[_random.Next(0, Vowels.Count)];
-         }
-      }
+      private char RandomVowel => Vowels[_random.Next(0, Vowels.Count)];
+
+      #endregion
+
+      #region Constructors
 
       /// <summary>
-      /// Create a new callsign that is unique to this class instance.
+      /// Constructor.
       /// </summary>
-      /// <param name="firstLetter">Optional letter the callsign should start with. Value should be alphabetic and uppercase.</param>
-      /// <returns>A unique callsign optionally starting with a certain character.</returns>
-      public string Unique(char? firstLetter = null) {
-         string callsign = Random(firstLetter);
-         while(_uniqueNames.Contains(callsign))
-         {
+      public CallsignGenerator() { }
+
+      /// <summary>
+      /// Constructor.
+      /// </summary>
+      /// <param name="minLetters">Minimum letters a callsign should have</param>
+      /// <param name="maxLetters">Maximum letters a callsign should have</param>
+      public CallsignGenerator(int minLetters, int maxLetters)
+      {
+         if (minLetters > maxLetters)
+            throw new ArgumentOutOfRangeException("Minimum letters should be less than maximum letters");
+         else if (minLetters <= 0 || maxLetters <= 0)
+            throw new ArgumentOutOfRangeException("Values should be greater than zero");
+
+         MinLetters = minLetters;
+         MaxLetters = maxLetters;
+      }
+
+      #endregion
+
+      /// <summary>
+      /// Create a new callsign unique to this instance. Does not store the callsign.
+      /// </summary>
+      /// <param name="firstLetter">Optional letter the callsign should start with.</param>
+      /// <returns>The generated callsign.</returns>
+      public string NextUnique(char? firstLetter = null) {
+         string callsign = NextRandom(firstLetter);
+         while(UniqueNames.Contains(callsign))
+         { // TODO add a counter that expires with enough iterations and throws an exception instead of looping
             Console.Write(callsign + " is not unique. Generating... ");
-            callsign = Random();
+            callsign = NextRandom();
             Console.WriteLine(callsign);
          }
-         _uniqueNames.Add(callsign);
+         UniqueNames.Add(callsign);
          return callsign;
       }
 
       /// <summary>
-      /// Create a new callsign that is not guaranteed to be unique.
+      /// Create and store a new callsign unique to this instance.
       /// </summary>
-      /// <param name="firstLetter">Optional letter the callsign should start with. Value should be alphabetic and uppercase.</param>
-      /// <returns>A non-unique callsign optionally starting with a certain character.</returns>
-      public string Random(char? firstLetter = null) {
+      /// <param name="firstLetter">Optional letter the callsign should start with</param>
+      /// <returns>The generated callsign.</returns>
+      public string AddNextUnique(char? firstLetter = null)
+      {
+         string callsign = NextUnique(firstLetter);
+         RandomNames.Add(callsign);
+         UniqueNames.Add(callsign);
+         return callsign;
+      }
+
+      /// <summary>
+      /// Create a new callsign (not guaranteed to be unique). Does not store the callsign.
+      /// </summary>
+      /// <param name="firstLetter">Optional letter the callsign should start with</param>
+      /// <returns>The generated callsign.</returns>
+      public string NextRandom(char? firstLetter = null) {
          int characters = _random.Next(MinLetters, MaxLetters + 1);
          StringBuilder builder = new StringBuilder();
          bool nextIsVowel = false;
@@ -90,13 +142,9 @@ namespace WaypointNetwork
             builder.Append(firstLetter);
             characters--;
             if(Vowels.Contains((char)firstLetter))
-            {
                nextIsVowel = false;
-            }
             else
-            {
                nextIsVowel = true;
-            }
          }
 
          for (int i = 1; i <= characters; i++)
@@ -114,9 +162,7 @@ namespace WaypointNetwork
                if (i == 1 && previousConsonant == 'X')
                {
                   while (previousConsonant == 'X')
-                  {
                      previousConsonant = RandomConsonant;
-                  }
                   builder.Append(previousConsonant);
                   nextIsVowel = true;
                }
@@ -127,9 +173,7 @@ namespace WaypointNetwork
                   if (i == characters)
                   {
                      while (previousConsonant == 'Q')
-                     {
                         previousConsonant = RandomConsonant;
-                     }
                      builder.Append(previousConsonant);
                      nextIsVowel = true;
                   }
@@ -145,9 +189,7 @@ namespace WaypointNetwork
                else if (i == characters && previousConsonant == 'J')
                {
                   while (previousConsonant == 'J')
-                  {
                      previousConsonant = RandomConsonant;
-                  }
                   builder.Append(previousConsonant);
                }
                else
@@ -162,42 +204,59 @@ namespace WaypointNetwork
       }
 
       /// <summary>
-      /// Constructor.
+      /// Create and store a new callsign (not guaranteed to be unique).
       /// </summary>
-      public CallsignGenerator()
+      /// <param name="firstLetter">Optional letter the callsign should start with</param>
+      /// <returns>The generated callsign</returns>
+      public string AddNextRandom(char? firstLetter = null)
       {
-         _random = new Random();
-         _uniqueNames = new HashSet<string>();
+         string callsign = NextRandom(firstLetter);
+         RandomNames.Add(callsign);
+         UniqueNames.Add(callsign);
+         return callsign;
       }
 
       /// <summary>
-      /// Gets a set of non-unique callsigns.
+      /// Generates and stores a set of non-unique callsigns.
       /// </summary>
       /// <param name="number">The number of words to generate.</param>
-      /// <returns>A set of random strings in the form [consonant][vowel][consonant]+ or [vowel][consonant][vowel]+.</returns>
-      public List<string> RandomCallsigns(int number)
+      /// <returns>The new set of generated callsigns</returns>
+      public string[] AddRandom(int number)
       {
-         List<string> names = new List<string>();
-         for(int i = 1; i <= number; i++)
-         {
-            names.Add(Random());
-         }
+         if (number <= 0)
+            throw new ArgumentOutOfRangeException("Number must be greater than zero");
+
+         string[] names = new string[number];
+         for (int i = 0; i < names.Length; i++)
+            names[i] = AddNextRandom();
          return names;
       }
 
       /// <summary>
-      /// Gets a set of unique random callsigns.
+      /// Generates and stores a set of unique random callsigns.
       /// </summary>
       /// <param name="number">The number of words to generate.</param>
-      /// <returns>A set of random strings in the form [consonant][vowel][consonant]+ or [vowel][consonant][vowel]+.</returns>
-      public List<string> UniqueCallsigns(int number)
+      /// <returns>The new set of generated callsigns</returns>
+      public string[] AddUnique(int number)
       {
-         List<string> names = new List<string>();
-         for (int i = 1; i <= number; i++)
-         {
-            names.Add(Unique());
-         }
+         if (number <= 0)
+            throw new ArgumentOutOfRangeException("Number must be greater than zero");
+
+         string[] names = new string[number];
+         for (int i = 0; i < number; i++)
+            names[i] = AddNextUnique();
          return names;
+      }
+
+      /// <summary>
+      /// Lists all the names stored by this generator.
+      /// </summary>
+      /// <returns></returns>
+      public override string ToString()
+      {
+         StringBuilder builder = new StringBuilder();
+         builder.AppendJoin(", ", NamesSorted);
+         return builder.ToString();
       }
    }
 }

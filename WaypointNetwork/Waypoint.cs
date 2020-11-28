@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using DGL.Utility;
 
 namespace WaypointNetwork
 {
@@ -53,7 +54,7 @@ namespace WaypointNetwork
       public Waypoint()
       {
          ConstructorHelper();
-         _callsign = _generator.Unique();
+         _callsign = _generator.NextUnique();
       }
 
       /// <summary>
@@ -69,7 +70,7 @@ namespace WaypointNetwork
       public Waypoint(char callsignFirstLetter)
       {
          ConstructorHelper();
-         _callsign = _generator.Random(callsignFirstLetter);
+         _callsign = _generator.NextRandom(callsignFirstLetter);
       }
 
       /// <summary>
